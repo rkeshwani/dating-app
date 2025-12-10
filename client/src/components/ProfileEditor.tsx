@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { UserProfile, AiAnalysisResult } from '../types';
-import { analyzeProfile, analyzeImageMetadata } from '../services/geminiService';
+import { analyzeProfile, analyzeImageMetadata } from '../services/api';
 import AnalysisPanel from './AnalysisPanel';
 import { Camera, MapPin, Briefcase, Heart, Wand2, Loader2, Save, ScanFace } from 'lucide-react';
 

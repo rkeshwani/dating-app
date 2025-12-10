@@ -1,0 +1,33 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                  String   @id @default(uuid())
+  googleId            String?  @unique
+  facebookId          String?  @unique
+  email               String?  @unique
+  name                String?
+  age                 Int?
+  gender              String?
+  location            String?
+  jobTitle            String?
+  bio                 String?
+  interests           String?  // Stored as JSON string or comma-separated
+  lookingForDescription String?
+  photoUrl            String?
+  interestedIn        String?  // Stored as JSON string or comma-separated
+  ageRangeMin         Int?
+  ageRangeMax         Int?
+  onboardingCompleted Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
