@@ -1,7 +1,9 @@
+import 'dotenv/config';
 import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
 import cors from 'cors';
+import path from 'path';
 import './config/passport';
 import authRoutes from './routes/auth';
 import profileRoutes from './routes/profile';
@@ -12,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173', // Vite default port
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true
 }));
 app.use(express.json());
@@ -38,8 +40,19 @@ app.use('/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api', aiRoutes);
 
-app.get('/', (req, res) => {
-  res.send('API is running');
+// Serve static files from the client app
+app.use(express.static(path.join(__dirname, '../../client/dist')));
+
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+  const clientBuildPath = path.join(__dirname, '../../client/dist/index.html');
+  // Check if file exists, if not send API running message (dev mode fallback)
+  res.sendFile(clientBuildPath, (err) => {
+    if (err) {
+       res.send('API is running. (Client build not found at ' + clientBuildPath + ')');
+    }
+  });
 });
 
 app.listen(PORT, () => {
