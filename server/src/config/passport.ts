@@ -13,7 +13,21 @@ passport.serializeUser((user: any, done) => {
 passport.deserializeUser(async (id: string, done) => {
   try {
     const user = await prisma.user.findUnique({ where: { id } });
-    done(null, user);
+    if (user) {
+      // Parse JSON fields to match UserProfile interface
+      const parsedUser = {
+        ...user,
+        interests: user.interests ? JSON.parse(user.interests) : [],
+        interestedIn: user.interestedIn ? JSON.parse(user.interestedIn) : [],
+        ageRangePreference: {
+          min: user.ageRangeMin || 18,
+          max: user.ageRangeMax || 100
+        }
+      };
+      done(null, parsedUser);
+    } else {
+      done(null, null);
+    }
   } catch (error) {
     done(error);
   }

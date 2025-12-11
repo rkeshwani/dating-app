@@ -15,7 +15,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, initialProfile }) =
   const handleBack = () => setStep(s => s - 1);
 
   const toggleInterest = (gender: Gender) => {
-    const current = profile.interestedIn;
+    const current = profile.interestedIn || [];
     if (current.includes(gender)) {
       setProfile({ ...profile, interestedIn: current.filter(g => g !== gender) });
     } else {
@@ -89,7 +89,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, initialProfile }) =
               key={g}
               onClick={() => toggleInterest(g)}
               className={`p-4 rounded-xl border-2 font-semibold transition-all ${
-                profile.interestedIn.includes(g)
+                (profile.interestedIn || []).includes(g)
                 ? 'border-rose-500 bg-rose-50 text-rose-700'
                 : 'border-slate-100 bg-white text-slate-600 hover:border-slate-200'
               }`}
@@ -122,7 +122,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, initialProfile }) =
          <button onClick={handleBack} className="px-6 py-4 font-semibold text-slate-500 hover:text-slate-800">Back</button>
          <button 
           onClick={handleNext}
-          disabled={profile.interestedIn.length === 0}
+          disabled={(profile.interestedIn || []).length === 0}
           className="flex-1 bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
           Next Step <ArrowRight className="w-5 h-5" />
