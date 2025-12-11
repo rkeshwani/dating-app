@@ -54,7 +54,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, initialProfile }) =
          <div>
           <label className="block text-sm font-semibold text-slate-700 mb-2">Your Gender</label>
           <select 
-            value={profile.gender}
+            value={profile.gender || ""}
             onChange={e => setProfile({...profile, gender: e.target.value as Gender})}
             className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none transition-all appearance-none"
           >
@@ -144,7 +144,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, initialProfile }) =
            The Magic Prompt
         </div>
         <textarea
-          value={profile.lookingForDescription}
+          value={profile.lookingForDescription || ""}
           onChange={e => setProfile({...profile, lookingForDescription: e.target.value})}
           className="w-full h-40 bg-white/10 border border-white/20 rounded-xl p-4 text-white placeholder-indigo-300 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:bg-white/20 transition-all resize-none leading-relaxed"
           placeholder="E.g., Someone kind, adventurous, loves dogs, and wants to travel..."
@@ -155,7 +155,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete, initialProfile }) =
          <button onClick={handleBack} className="px-6 py-4 font-semibold text-slate-500 hover:text-slate-800">Back</button>
          <button 
           onClick={() => onComplete({...profile, onboardingCompleted: true})}
-          disabled={profile.lookingForDescription.length < 10}
+          disabled={(profile.lookingForDescription || "").length < 10}
           className="flex-1 bg-rose-500 text-white py-4 rounded-xl font-bold hover:bg-rose-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-rose-200 disabled:opacity-50"
         >
           Finish & Explore <Check className="w-5 h-5" />
