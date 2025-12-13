@@ -1,9 +1,40 @@
-services:
-  - type: web
-    name: aura-match
-    env: node
-    buildCommand: npm run build
-    startCommand: npm start
-    envVars:
-      - key: NODE_VERSION
-        value: 22.16.0
+version: "1"
+projects:
+- name: Dating App
+  environments:
+  - name: Production
+    services:
+    - type: web
+      name: dating-app
+      runtime: static
+      repo: https://github.com/rkeshwani/dating-app
+      buildCommand: npm run build
+      staticPublishPath: dist
+      autoDeployTrigger: commit
+      rootDir: ./client
+      envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: dating-app-backend
+          property: url
+      previews:
+        generation: automatic
+    - type: web
+      name: dating-app-backend
+      runtime: node
+      repo: https://github.com/rkeshwani/dating-app
+      plan: free
+      region: oregon
+      buildCommand: npm install && npx prisma generate && npm run build && npx prisma migrate deploy
+      startCommand: npm start
+      autoDeployTrigger: commit
+      rootDir: server
+      envVars:
+      - key: CLIENT_URL
+        fromService:
+          type: web
+          name: dating-app
+          property: url
+      previews:
+        generation: automatic
