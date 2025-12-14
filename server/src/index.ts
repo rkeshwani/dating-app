@@ -8,6 +8,7 @@ import './config/passport';
 import authRoutes from './routes/auth';
 import profileRoutes from './routes/profile';
 import aiRoutes from './routes/ai';
+import matchRoutes from './routes/matches';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +39,7 @@ app.use(passport.session());
 // Routes
 app.use('/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/matches', matchRoutes);
 app.use('/api', aiRoutes);
 
 // Serve static files from the client app
