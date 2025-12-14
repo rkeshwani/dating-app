@@ -1,6 +1,5 @@
 import express from 'express';
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { User } from '@prisma/client';
 
 const router = express.Router();
 
@@ -85,7 +84,7 @@ router.post('/analyze-profile', async (req, res) => {
     `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -133,7 +132,7 @@ router.post('/analyze-image', async (req, res) => {
     const data = matches[2];
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite",
       contents: [
         {
           inlineData: {
