@@ -1,5 +1,6 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import { generateMatches } from '../services/matchService';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -42,6 +43,20 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Mock Geocoding Function (Replace with real API in production)
+const getCoordinates = (city: string): { lat: number, lon: number } | null => {
+    const cityMap: Record<string, { lat: number, lon: number }> = {
+        "New York": { lat: 40.7128, lon: -74.0060 },
+        "San Francisco": { lat: 37.7749, lon: -122.4194 },
+        "London": { lat: 51.5074, lon: -0.1278 },
+        "Los Angeles": { lat: 34.0522, lon: -118.2437 },
+        "Chicago": { lat: 41.8781, lon: -87.6298 },
+        "Austin": { lat: 30.2672, lon: -97.7431 },
+        // Add more mock data or return random for testing if city unknown
+    };
+    return cityMap[city] || null;
+}
+
 // Update user profile
 router.put('/', async (req, res) => {
   try {
@@ -49,8 +64,22 @@ router.put('/', async (req, res) => {
     const {
       name, age, gender, location, jobTitle, bio,
       interests, lookingForDescription, photoUrl,
-      interestedIn, ageRangePreference, onboardingCompleted
+      interestedIn, ageRangePreference, onboardingCompleted,
+      latitude, longitude // Allow direct update if client has it
     } = req.body;
+
+    // Determine Coords
+    let lat = latitude;
+    let lon = longitude;
+
+    if (!lat && !lon && location) {
+        // Try to geocode if location changed and coords not provided
+        const coords = getCoordinates(location);
+        if (coords) {
+            lat = coords.lat;
+            lon = coords.lon;
+        }
+    }
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -59,6 +88,8 @@ router.put('/', async (req, res) => {
         age,
         gender,
         location,
+        latitude: lat,
+        longitude: lon,
         jobTitle,
         bio,
         interests: JSON.stringify(interests || []),
@@ -70,6 +101,11 @@ router.put('/', async (req, res) => {
         onboardingCompleted
       }
     });
+
+    // Trigger Match Generation in Background
+    if (onboardingCompleted) {
+        generateMatches(userId).catch(err => console.error("Background match generation failed:", err));
+    }
 
     res.json(updatedUser);
   } catch (error) {
