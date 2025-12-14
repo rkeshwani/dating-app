@@ -102,7 +102,14 @@ router.put('/', async (req, res) => {
       }
     });
 
-    // Trigger Match Generation in Background
+    // Invalidate existing matches where this user is the target
+    // This ensures that when other users (Source) run their next match generation,
+    // this user (Target) is treated as "new" or "unscored" and gets re-evaluated with their new profile data.
+    await prisma.matchRecommendation.deleteMany({
+        where: { targetUserId: userId }
+    });
+
+    // Trigger Match Generation in Background for the current user (as Source)
     if (onboardingCompleted) {
         generateMatches(userId).catch(err => console.error("Background match generation failed:", err));
     }

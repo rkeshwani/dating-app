@@ -65,6 +65,7 @@ export async function generateMatches(userId: string) {
     }
 
     // 1. Fetch Candidates (Hard Filters)
+    // Exclude users already scored for this source user to allow paginating through the pool.
     const candidates = await prisma.user.findMany({
       where: {
         id: { not: userId },
@@ -73,6 +74,12 @@ export async function generateMatches(userId: string) {
           gte: sourceUser.ageRangeMin || 18,
           lte: sourceUser.ageRangeMax || 100,
         },
+        // Exclude candidates who already have a recommendation from this source user
+        matchRecommendationsAsTarget: {
+            none: {
+                sourceUserId: userId
+            }
+        }
       }
     });
 
@@ -107,7 +114,7 @@ export async function generateMatches(userId: string) {
     // 3. Take top 10 (Pagination/Limit)
     const topCandidates = candidatesWithDistance.slice(0, 10);
 
-    console.log(`Found ${topCandidates.length} candidates to score.`);
+    console.log(`Found ${topCandidates.length} new candidates to score.`);
 
     // 4. Score with LLM
     for (const targetUser of topCandidates) {
@@ -162,7 +169,7 @@ export async function generateMatches(userId: string) {
 
         try {
             const response = await ai.models.generateContent({
-                model: "gemini-1.5-flash", // Corrected model
+                model: "gemini-2.5-flash-lite",
                 contents: parts,
                 config: {
                     responseMimeType: "application/json",
