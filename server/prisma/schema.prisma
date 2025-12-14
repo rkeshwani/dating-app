@@ -19,6 +19,8 @@ model User {
   age                 Int?
   gender              String?
   location            String?
+  latitude            Float?
+  longitude           Float?
   jobTitle            String?
   bio                 String?
   interests           String?  // Stored as JSON string or comma-separated
@@ -30,4 +32,26 @@ model User {
   onboardingCompleted Boolean  @default(false)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+
+  matchRecommendationsAsSource MatchRecommendation[] @relation("SourceUser")
+  matchRecommendationsAsTarget MatchRecommendation[] @relation("TargetUser")
+}
+
+model MatchRecommendation {
+  id              String   @id @default(uuid())
+  sourceUserId    String
+  targetUserId    String
+  score           Int      // 0-100
+  algorithm       String   // 'one_way' | 'two_way'
+  reasoning       String
+  matchFactors    String?  // JSON string storing extracted metadata/factors
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sourceUser      User     @relation("SourceUser", fields: [sourceUserId], references: [id], onDelete: Cascade)
+  targetUser      User     @relation("TargetUser", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  @@index([sourceUserId])
+  @@index([algorithm])
+  @@unique([sourceUserId, targetUserId, algorithm])
 }
