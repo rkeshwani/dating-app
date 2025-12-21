@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import { GoogleGenAI, Type, Schema, Part } from "@google/genai";
 
 const prisma = new PrismaClient();
@@ -84,7 +84,7 @@ export async function generateMatches(userId: string) {
     });
 
     // 2. Filter & Sort by Distance
-    let filteredCandidates = candidates.filter(c => {
+    let filteredCandidates = candidates.filter((c: User) => {
         // Gender Check
         if (sourceUser.interestedIn) {
             try {
@@ -100,7 +100,7 @@ export async function generateMatches(userId: string) {
     });
 
     // Calculate distances if both have location
-    const candidatesWithDistance = filteredCandidates.map(c => {
+    const candidatesWithDistance = filteredCandidates.map((c: User) => {
         let distance = 999999;
         if (sourceUser.latitude && sourceUser.longitude && c.latitude && c.longitude) {
             distance = getDistance(sourceUser.latitude, sourceUser.longitude, c.latitude, c.longitude);
@@ -109,7 +109,7 @@ export async function generateMatches(userId: string) {
     });
 
     // Sort by distance
-    candidatesWithDistance.sort((a, b) => a.distance - b.distance);
+    candidatesWithDistance.sort((a: User & { distance: number }, b: User & { distance: number }) => a.distance - b.distance);
 
     // 3. Take top 10 (Pagination/Limit)
     const topCandidates = candidatesWithDistance.slice(0, 10);

@@ -1,5 +1,5 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, MatchRecommendation, User } from '@prisma/client';
 import { generateMatches } from '../services/matchService';
 
 const router = express.Router();
@@ -72,7 +72,7 @@ router.get('/recommendations', async (req, res) => {
         });
 
         // Parse JSON fields for the frontend
-        const parsedRecommendations = recommendations.map(rec => ({
+        const parsedRecommendations = recommendations.map((rec: MatchRecommendation & { targetUser: Partial<User> }) => ({
             ...rec,
             matchFactors: rec.matchFactors ? JSON.parse(rec.matchFactors) : null,
             targetUser: {
