@@ -1,3 +1,9 @@
+/**
+ * Portions of this recommendation logic are inspired by the x-algorithm (Phoenix) by xAI.
+ * Licensed under the Apache License, Version 2.0.
+ * See: https://github.com/xai-org/x-algorithm
+ */
+
 import { PrismaClient, User } from '@prisma/client';
 import { GoogleGenAI, Type, Schema, Part } from "@google/genai";
 
@@ -26,9 +32,9 @@ function deg2rad(deg: number): number {
 const matchSchema: Schema = {
   type: Type.OBJECT,
   properties: {
-    oneWayScore: { type: Type.INTEGER, description: "Score (0-100) indicating how well the Target fits the Source's 'Looking For'." },
-    twoWayScore: { type: Type.INTEGER, description: "Score (0-100) indicating bidirectional compatibility." },
-    reasoning: { type: Type.STRING, description: "Reasoning for the scores." },
+    sourceSwipeProbability: { type: Type.INTEGER, description: "Probability (0-100) that the Source user will swipe right on the Target." },
+    targetSwipeProbability: { type: Type.INTEGER, description: "Probability (0-100) that the Target user will swipe right on the Source." },
+    reasoning: { type: Type.STRING, description: "Reasoning for the predicted probabilities." },
     matchFactors: {
       type: Type.OBJECT,
       description: "Extracted key match factors",
@@ -39,7 +45,7 @@ const matchSchema: Schema = {
       }
     }
   },
-  required: ["oneWayScore", "twoWayScore", "reasoning", "matchFactors"]
+  required: ["sourceSwipeProbability", "targetSwipeProbability", "reasoning", "matchFactors"]
 };
 
 function getImagePart(dataUrl: string): Part | null {
@@ -116,34 +122,42 @@ export async function generateMatches(userId: string) {
 
     console.log(`Found ${topCandidates.length} new candidates to score.`);
 
-    // 4. Score with LLM
+    // 4. Score with LLM (Phoenix-inspired engagement prediction)
     for (const targetUser of topCandidates) {
         const parts: Part[] = [];
 
-        // Add Source User Text
+        // Structure inputs as Feature Sets
         parts.push({
             text: `
-          Analyze the match potential between two users.
+          Act as a recommendation system. You are predicting the probability of a specific engagement: a "Swipe Right".
 
-          **Source User (The one looking):**
+          Analyze the compatibility between the Source User and Candidate User based on their profile features.
+
+          **Source User Features (The one browsing):**
           - Name: ${sourceUser.name}
           - Age: ${sourceUser.age}
           - Gender: ${sourceUser.gender}
+          - Job Title: ${sourceUser.jobTitle}
           - Bio: "${sourceUser.bio}"
           - Interests: ${sourceUser.interests}
           - Looking For: "${sourceUser.lookingForDescription}"
+          - Interested In (Gender): ${sourceUser.interestedIn}
 
-          **Target User (The candidate):**
+          **Candidate User Features (The profile being viewed):**
           - Name: ${targetUser.name}
           - Age: ${targetUser.age}
           - Gender: ${targetUser.gender}
+          - Job Title: ${targetUser.jobTitle}
           - Bio: "${targetUser.bio}"
           - Interests: ${targetUser.interests}
+          - Looking For: "${targetUser.lookingForDescription}"
 
-          Determine:
-          1. **One-Way Score**: How well does the Target fit what the Source is explicitly looking for?
-          2. **Two-Way Score**: How compatible are they bidirectionally (assuming Target is looking for someone like Source)?
-          3. **Match Factors**: Extract key factors like shared interests, personality vibe match, etc.
+          **Task:**
+          Predict the probability (0-100) of a "Swipe Right" action in both directions.
+
+          1. **sourceSwipeProbability**: What is the probability the Source User will swipe right on the Candidate? Consider if the Candidate matches the Source's "Looking For" and preferences.
+          2. **targetSwipeProbability**: What is the probability the Candidate User will swipe right on the Source? Consider if the Source matches the Candidate's "Looking For" and preferences.
+          3. **Match Factors**: Extract key reasons for these predictions.
 
           (See attached images if any for visual vibe check)
             `
@@ -181,6 +195,17 @@ export async function generateMatches(userId: string) {
             if (text) {
                 const result = JSON.parse(text);
 
+                // Calculate Scores
+                const sourceProb = result.sourceSwipeProbability || 0;
+                const targetProb = result.targetSwipeProbability || 0;
+
+                // One-Way Score is simply the probability Source likes Target
+                const oneWayScore = sourceProb;
+
+                // Two-Way Score is the joint probability (Source likes Target AND Target likes Source)
+                // Normalize: (P(A) * P(B)) / 100 to keep it on 0-100 scale
+                const twoWayScore = Math.round((sourceProb * targetProb) / 100);
+
                 // 5. Store Results (Upsert)
                 // One-Way
                 await prisma.matchRecommendation.upsert({
@@ -192,7 +217,7 @@ export async function generateMatches(userId: string) {
                         }
                     },
                     update: {
-                        score: result.oneWayScore,
+                        score: oneWayScore,
                         reasoning: result.reasoning,
                         matchFactors: JSON.stringify(result.matchFactors),
                         updatedAt: new Date()
@@ -201,7 +226,7 @@ export async function generateMatches(userId: string) {
                         sourceUserId: sourceUser.id,
                         targetUserId: targetUser.id,
                         algorithm: 'one_way',
-                        score: result.oneWayScore,
+                        score: oneWayScore,
                         reasoning: result.reasoning,
                         matchFactors: JSON.stringify(result.matchFactors)
                     }
@@ -217,7 +242,7 @@ export async function generateMatches(userId: string) {
                         }
                     },
                     update: {
-                        score: result.twoWayScore,
+                        score: twoWayScore,
                         reasoning: result.reasoning,
                         matchFactors: JSON.stringify(result.matchFactors),
                         updatedAt: new Date()
@@ -226,7 +251,7 @@ export async function generateMatches(userId: string) {
                         sourceUserId: sourceUser.id,
                         targetUserId: targetUser.id,
                         algorithm: 'two_way',
-                        score: result.twoWayScore,
+                        score: twoWayScore,
                         reasoning: result.reasoning,
                         matchFactors: JSON.stringify(result.matchFactors)
                     }
