@@ -26,7 +26,8 @@ projects:
       repo: https://github.com/rkeshwani/dating-app
       plan: free
       region: oregon
-      buildCommand: npm install && npx prisma generate && npm run build && npx prisma migrate deploy
+      # Magic build command: Switch SQLite -> Postgres, Install, Generate, Build, Migrate
+      buildCommand: "sed -i 's/provider = \"sqlite\"/provider = \"postgresql\"/g' prisma/schema.prisma && npm install && npx prisma generate && npm run build && npx prisma migrate deploy"
       startCommand: npm start
       autoDeployTrigger: commit
       rootDir: server
@@ -36,5 +37,20 @@ projects:
           type: web
           name: dating-app
           property: url
+      - key: DATABASE_URL
+        fromService:
+          type: psql
+          name: dating-app-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
       previews:
         generation: automatic
+    - type: psql
+      name: dating-app-db
+      plan: free
+      region: oregon
+      databaseName: dating_app_db
+      user: dating_app_user
