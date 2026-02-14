@@ -6,6 +6,8 @@ import Onboarding from './components/Onboarding';
 import Login from './pages/Login';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import Dashboard from './pages/Dashboard';
+import AdminRoute from './components/AdminRoute';
 import { UserProfile } from '@aura-match/shared';
 import { User, Compass, MessageCircle, LogOut } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -148,6 +150,12 @@ const App = () => {
         <Route path="/login" element={!user ? <Login /> : <Navigate to="/" replace />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+
+        <Route path="/dashboard" element={
+          <AdminRoute>
+            <Dashboard />
+          </AdminRoute>
+        } />
 
         {/* Root route: Shows Login (as Homepage) if not logged in, Dashboard if logged in */}
         <Route path="/" element={

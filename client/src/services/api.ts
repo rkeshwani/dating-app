@@ -62,6 +62,12 @@ export const analyzeImageMetadata = async (base64DataUrl: string): Promise<{ hai
   return handleResponse(response);
 };
 
+export const getAdminDashboardMetrics = async () => {
+  const response = await fetchWithCreds('/api/admin/dashboard');
+  if (response.status === 403) throw new Error("Forbidden");
+  return handleResponse(response);
+};
+
 export const getCurrentUser = async () => {
   const response = await fetchWithCreds('/auth/me');
   if (response.status === 401) return null;
