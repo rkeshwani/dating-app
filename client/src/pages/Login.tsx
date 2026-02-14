@@ -3,14 +3,15 @@ import { Sparkles, Heart } from 'lucide-react';
 
 const Login = () => {
   const handleLogin = (provider: string) => {
-    window.location.href = `/auth/${provider}`;
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+    window.location.href = `${API_BASE_URL}/auth/${provider}`;
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
         <div className="w-16 h-16 bg-gradient-to-tr from-rose-500 to-orange-500 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-lg shadow-rose-200">
-           <Heart className="w-8 h-8 fill-current" />
+          <Heart className="w-8 h-8 fill-current" />
         </div>
 
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Aura Match</h1>
@@ -30,7 +31,7 @@ const Login = () => {
             className="w-full flex items-center justify-center gap-3 bg-[#1877F2] text-white font-medium py-3 px-4 rounded-xl hover:bg-[#166fe5] transition-colors shadow-sm shadow-blue-200"
           >
             <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
             </svg>
             Continue with Facebook
           </button>
