@@ -26,8 +26,8 @@ projects:
       repo: https://github.com/rkeshwani/dating-app
       plan: free
       region: oregon
-      # Magic build command: Switch SQLite -> Postgres, Install, Generate, Build, Migrate
-      buildCommand: "sed -i 's/provider = \"sqlite\"/provider = \"postgresql\"/g' prisma/schema.prisma && npm install && npx prisma generate && npm run build && npx prisma migrate deploy"
+      # Magic build command: Switch SQLite -> Postgres, Install, Generate, Build, DB Push (skip migrations)
+      buildCommand: "sed -i 's/provider = \"sqlite\"/provider = \"postgresql\"/g' prisma/schema.prisma && npm install && npx prisma generate && npm run build && npx prisma db push"
       startCommand: npm start
       autoDeployTrigger: commit
       rootDir: server
@@ -45,6 +45,14 @@ projects:
       - key: SESSION_SECRET
         generateValue: true
       - key: GEMINI_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: FACEBOOK_APP_ID
+        sync: false
+      - key: FACEBOOK_APP_SECRET
         sync: false
       previews:
         generation: automatic

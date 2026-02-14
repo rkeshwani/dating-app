@@ -3,9 +3,11 @@ import passport from 'passport';
 
 const router = express.Router();
 
+const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+
 router.get('/mock', passport.authenticate('mock', {
-  successRedirect: 'http://localhost:5173/', // Client URL
-  failureRedirect: 'http://localhost:5173/login'
+  successRedirect: `${CLIENT_URL}/`,
+  failureRedirect: `${CLIENT_URL}/login`
 }));
 
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -13,7 +15,7 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
-    res.redirect('http://localhost:5173/');
+    res.redirect(`${CLIENT_URL}/`);
   }
 );
 
@@ -22,7 +24,7 @@ router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }))
 router.get('/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login' }),
   (req, res) => {
-    res.redirect('http://localhost:5173/');
+    res.redirect(`${CLIENT_URL}/`);
   }
 );
 

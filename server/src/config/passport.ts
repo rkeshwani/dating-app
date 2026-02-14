@@ -64,28 +64,29 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/auth/google/callback"
+    callbackURL: "/auth/google/callback",
+    proxy: true
   },
-  async (accessToken, refreshToken, profile, done) => {
-    try {
-      let user = await prisma.user.findUnique({ where: { googleId: profile.id } });
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        let user = await prisma.user.findUnique({ where: { googleId: profile.id } });
 
-      if (!user) {
-        user = await prisma.user.create({
-          data: {
-            googleId: profile.id,
-            email: profile.emails?.[0].value,
-            name: profile.displayName,
-            photoUrl: profile.photos?.[0].value
-          }
-        });
+        if (!user) {
+          user = await prisma.user.create({
+            data: {
+              googleId: profile.id,
+              email: profile.emails?.[0].value,
+              name: profile.displayName,
+              photoUrl: profile.photos?.[0].value
+            }
+          });
+        }
+
+        done(null, user);
+      } catch (error) {
+        done(error);
       }
-
-      done(null, user);
-    } catch (error) {
-      done(error);
-    }
-  }));
+    }));
 }
 
 // Facebook Strategy
@@ -94,26 +95,27 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
     callbackURL: "/auth/facebook/callback",
-    profileFields: ['id', 'displayName', 'photos', 'email']
+    profileFields: ['id', 'displayName', 'photos', 'email'],
+    proxy: true
   },
-  async (accessToken, refreshToken, profile, done) => {
-    try {
-      let user = await prisma.user.findUnique({ where: { facebookId: profile.id } });
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        let user = await prisma.user.findUnique({ where: { facebookId: profile.id } });
 
-      if (!user) {
-        user = await prisma.user.create({
-          data: {
-            facebookId: profile.id,
-            email: profile.emails?.[0].value,
-            name: profile.displayName,
-            photoUrl: profile.photos?.[0].value
-          }
-        });
+        if (!user) {
+          user = await prisma.user.create({
+            data: {
+              facebookId: profile.id,
+              email: profile.emails?.[0].value,
+              name: profile.displayName,
+              photoUrl: profile.photos?.[0].value
+            }
+          });
+        }
+
+        done(null, user);
+      } catch (error) {
+        done(error);
       }
-
-      done(null, user);
-    } catch (error) {
-      done(error);
-    }
-  }));
+    }));
 }
