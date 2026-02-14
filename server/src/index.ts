@@ -57,8 +57,10 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'secret_key',
   resave: false,
   saveUninitialized: false,
+  proxy: true, // Required for secure cookies behind Render load balancer
   cookie: {
     secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site (Render), 'lax' for local
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000 // 1 day
   }
