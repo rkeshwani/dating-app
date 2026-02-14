@@ -87,6 +87,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         done(error);
       }
     }));
+} else {
+  console.warn("GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET missing. Google Login will not work.");
 }
 
 // Facebook Strategy
@@ -118,4 +120,6 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
         done(error);
       }
     }));
+} else {
+  console.warn("FACEBOOK_APP_ID or FACEBOOK_APP_SECRET missing. Facebook Login will not work.");
 }
