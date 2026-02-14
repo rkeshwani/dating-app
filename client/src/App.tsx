@@ -4,6 +4,8 @@ import ProfileEditor from './components/ProfileEditor';
 import DiscoverFeed from './components/DiscoverFeed';
 import Onboarding from './components/Onboarding';
 import Login from './pages/Login';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import { UserProfile } from '@aura-match/shared';
 import { User, Compass, MessageCircle, LogOut } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -17,10 +19,10 @@ const Navigation = () => {
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 pb-safe z-50 md:top-0 md:bottom-auto md:px-8 md:py-4 md:border-b md:border-t-0">
       <div className="max-w-4xl mx-auto flex justify-between md:justify-start md:gap-8 items-center px-6 h-16 md:h-auto">
         <Link to="/" className="md:mr-auto flex items-center gap-2">
-           <div className="w-8 h-8 bg-gradient-to-tr from-rose-500 to-orange-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-rose-200">
-             A
-           </div>
-           <span className="hidden md:block font-bold text-xl tracking-tight text-slate-900">Aura Match</span>
+          <div className="w-8 h-8 bg-gradient-to-tr from-rose-500 to-orange-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-rose-200">
+            A
+          </div>
+          <span className="hidden md:block font-bold text-xl tracking-tight text-slate-900">Aura Match</span>
         </Link>
 
         <Link to="/" className={`flex flex-col items-center gap-1 ${isActive('/') ? 'text-rose-500' : 'text-slate-400 hover:text-slate-600'}`}>
@@ -119,7 +121,7 @@ const AuthenticatedApp = () => {
           } />
           <Route path="/discover" element={
             <div className="animate-fade-in">
-               <header className="mb-8 text-center md:text-left">
+              <header className="mb-8 text-center md:text-left">
                 <h1 className="text-3xl font-bold text-slate-900">Discover</h1>
                 <p className="text-slate-500">Matches curated for your aura.</p>
               </header>
@@ -139,6 +141,8 @@ const App = () => {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="/*" element={
             <ProtectedRoute>
               <AuthenticatedApp />

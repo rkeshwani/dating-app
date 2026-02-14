@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sparkles, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
   const handleLogin = (provider: string) => {
@@ -59,7 +60,7 @@ const Login = () => {
         </div>
 
         <p className="mt-8 text-xs text-slate-400">
-          By continuing, you agree to our Terms of Service and Privacy Policy.
+          By continuing, you agree to our <Link to="/terms" className="underline hover:text-slate-600 transition-colors">Terms of Service</Link> and <Link to="/privacy" className="underline hover:text-slate-600 transition-colors">Privacy Policy</Link>.
         </p>
       </div>
     </div>
