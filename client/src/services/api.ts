@@ -70,5 +70,5 @@ export const getCurrentUser = async () => {
 
 export const logout = async () => {
   await fetchWithCreds('/auth/logout', { method: 'POST' });
-  window.location.href = '/login';
+  window.location.href = '/';
 };

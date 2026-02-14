@@ -136,22 +136,39 @@ const AuthenticatedApp = () => {
 };
 
 const App = () => {
+  const { user, loading } = useAuth(); // We need access to auth state here
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/*" element={
-            <ProtectedRoute>
-              <AuthenticatedApp />
-            </ProtectedRoute>
-          } />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <Router>
+      <Routes>
+        <Route path="/login" element={!user ? <Login /> : <Navigate to="/" replace />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+
+        {/* Root route: Shows Login (as Homepage) if not logged in, Dashboard if logged in */}
+        <Route path="/" element={
+          user ? <AuthenticatedApp /> : <Login />
+        } />
+
+        {/* Protected routes for other authenticated pages */}
+        <Route path="/*" element={
+          <ProtectedRoute>
+            <AuthenticatedApp />
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </Router>
   );
 };
 
-export default App;
+const AppWrapper = () => (
+  <AuthProvider>
+    <App />
+  </AuthProvider>
+);
+
+export default AppWrapper;
