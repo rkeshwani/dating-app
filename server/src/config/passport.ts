@@ -34,30 +34,32 @@ passport.deserializeUser(async (id: string, done) => {
 });
 
 // Mock Strategy for Dev
-passport.use('mock', new CustomStrategy(
-  async (req, done) => {
-    try {
-      // Find or create a mock user
-      let user = await prisma.user.findFirst({ where: { email: 'mock@example.com' } });
+if (process.env.NODE_ENV !== 'production') {
+  passport.use('mock', new CustomStrategy(
+    async (req, done) => {
+      try {
+        // Find or create a mock user
+        let user = await prisma.user.findFirst({ where: { email: 'mock@example.com' } });
 
-      if (!user) {
-        user = await prisma.user.create({
-          data: {
-            email: 'mock@example.com',
-            name: 'Mock User',
-            googleId: 'mock-google-id',
-            photoUrl: 'https://picsum.photos/400/400',
-            onboardingCompleted: false
-          }
-        });
+        if (!user) {
+          user = await prisma.user.create({
+            data: {
+              email: 'mock@example.com',
+              name: 'Mock User',
+              googleId: 'mock-google-id',
+              photoUrl: 'https://picsum.photos/400/400',
+              onboardingCompleted: false
+            }
+          });
+        }
+
+        done(null, user);
+      } catch (error) {
+        done(error);
       }
-
-      done(null, user);
-    } catch (error) {
-      done(error);
     }
-  }
-));
+  ));
+}
 
 // Google Strategy
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {

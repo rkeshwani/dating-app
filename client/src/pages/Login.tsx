@@ -36,22 +36,26 @@ const Login = () => {
             Continue with Facebook
           </button>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-slate-500">Developer Option</span>
-            </div>
-          </div>
+          {import.meta.env.DEV && (
+            <>
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-slate-500">Developer Option</span>
+                </div>
+              </div>
 
-          <button
-            onClick={() => handleLogin('mock')}
-            className="w-full flex items-center justify-center gap-3 bg-slate-800 text-white font-medium py-3 px-4 rounded-xl hover:bg-slate-900 transition-colors shadow-sm"
-          >
-            <Sparkles className="w-5 h-5 text-yellow-400" />
-            Mock Login (Dev Only)
-          </button>
+              <button
+                onClick={() => handleLogin('mock')}
+                className="w-full flex items-center justify-center gap-3 bg-slate-800 text-white font-medium py-3 px-4 rounded-xl hover:bg-slate-900 transition-colors shadow-sm"
+              >
+                <Sparkles className="w-5 h-5 text-yellow-400" />
+                Mock Login (Dev Only)
+              </button>
+            </>
+          )}
         </div>
 
         <p className="mt-8 text-xs text-slate-400">

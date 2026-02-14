@@ -5,10 +5,12 @@ const router = express.Router();
 
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
-router.get('/mock', passport.authenticate('mock', {
-  successRedirect: `${CLIENT_URL}/`,
-  failureRedirect: `${CLIENT_URL}/login`
-}));
+if (process.env.NODE_ENV !== 'production') {
+  router.get('/mock', passport.authenticate('mock', {
+    successRedirect: `${CLIENT_URL}/`,
+    failureRedirect: `${CLIENT_URL}/login`
+  }));
+}
 
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 

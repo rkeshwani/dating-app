@@ -4,6 +4,8 @@ import session from 'express-session';
 import passport from 'passport';
 import cors from 'cors';
 import path from 'path';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import './config/passport';
 import authRoutes from './routes/auth';
 import profileRoutes from './routes/profile';
@@ -16,21 +18,48 @@ const PORT = process.env.PORT || 3000;
 // Trust proxy for secure cookies behind load balancer (Render)
 app.set('trust proxy', 1);
 
+// Security Headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"], // unsafe-inline might be needed for some React setups, refine if possible
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"], // Allow images from https sources (social logins, etc)
+      connectSrc: ["'self'", process.env.CLIENT_URL || 'http://localhost:5173']
+    }
+  }
+}));
+
+// Rate Limiting for Auth Routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many login attempts from this IP, please try again after 15 minutes'
+});
+app.use('/auth', authLimiter);
+
 // Middleware
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' })); // Limit body size to prevent DoS
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Session
+if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
+  console.error("CRITICAL: SESSION_SECRET must be set in production environment.");
+  process.exit(1);
+}
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'secret_key',
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000 // 1 day
   }
 }));
@@ -55,7 +84,7 @@ app.get('*', (req, res) => {
   // Check if file exists, if not send API running message (dev mode fallback)
   res.sendFile(clientBuildPath, (err) => {
     if (err) {
-       res.send('API is running. (Client build not found at ' + clientBuildPath + ')');
+      res.send('API is running. (Client build not found at ' + clientBuildPath + ')');
     }
   });
 });
