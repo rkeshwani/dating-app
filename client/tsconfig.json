@@ -21,6 +21,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@aura-match/shared": [
+        "../../shared/src/index.ts"
       ]
     },
     "allowImportingTsExtensions": true,

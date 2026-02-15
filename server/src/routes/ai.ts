@@ -58,11 +58,26 @@ const analysisSchema: Schema = {
 
 router.post('/analyze-profile', async (req, res) => {
   try {
-    const profile = req.body; // Expects UserProfile like structure
+    const { profile, includePhotos } = req.body;
 
     if (!profile.lookingForDescription || profile.lookingForDescription.length < 5) {
       res.status(400).json({ message: "Please describe who you are looking for to get AI insights." });
       return;
+    }
+
+    let contents: any[] = [];
+
+    // Add Image if opted in and available
+    if (includePhotos && profile.photoUrl && profile.photoUrl.startsWith('data:image')) {
+      const matches = profile.photoUrl.match(/^data:(.+);base64,(.+)$/);
+      if (matches && matches.length === 3) {
+        contents.push({
+          inlineData: {
+            mimeType: matches[1],
+            data: matches[2]
+          }
+        });
+      }
     }
 
     const prompt = `
@@ -81,11 +96,19 @@ router.post('/analyze-profile', async (req, res) => {
       Analyze the gap between their current profile and what would attract their Target Match.
       Provide constructive, specific feedback to optimize their profile.
       Be honest but encouraging.
+
+      ${includePhotos ? "Also consider their profile photo in your analysis. Does it match the vibe they are going for?" : ""}
+
+      IMPORTANT: For the 'suggestions' array:
+      - If you suggest a better Bio, set 'category' to 'Bio' and provide the full new bio in 'exampleRewrite'.
+      - If you suggest adding interests, set 'category' to 'Interests' and provide a comma-separated list of interests in 'exampleRewrite' (e.g. "Hiking, Photography").
     `;
+
+    contents.push({ text: prompt });
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-lite",
-      contents: prompt,
+      contents: contents,
       config: {
         responseMimeType: "application/json",
         responseSchema: analysisSchema,

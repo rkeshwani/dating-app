@@ -44,11 +44,11 @@ export const updateProfile = async (profile: Partial<UserProfile>): Promise<User
   return handleResponse(response);
 };
 
-export const analyzeProfile = async (profile: UserProfile): Promise<AiAnalysisResult> => {
+export const analyzeProfile = async (profile: UserProfile, includePhotos: boolean = false): Promise<AiAnalysisResult> => {
   const response = await fetchWithCreds('/api/analyze-profile', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(profile)
+    body: JSON.stringify({ profile, includePhotos })
   });
   return handleResponse(response);
 };
