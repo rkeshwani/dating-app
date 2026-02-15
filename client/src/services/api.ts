@@ -74,7 +74,13 @@ export const getCurrentUser = async () => {
   return handleResponse(response);
 };
 
+
 export const logout = async () => {
   await fetchWithCreds('/auth/logout', { method: 'POST' });
   window.location.href = '/';
+};
+
+export const getMatchRecommendations = async (type: 'one_way' | 'two_way' = 'one_way') => {
+  const response = await fetchWithCreds(`/api/matches/recommendations?type=${type}`);
+  return handleResponse(response);
 };
